@@ -26,13 +26,19 @@ handleBlurInput(chieuRongInput);
 
 submitElement.click(function (event) {
     event.preventDefault(); // Ngăn chặn form gửi dữ liệu và tải lại trang
+    if (chieuDaiInput.val() === '' || chieuRongInput.val() === '') {
+        resultDiv.html(`
+    <p style="color: red">Vui lòng nhập đầy đủ thông tin vào!</p>
+`);
+    } else {
+        var chieuDai = parseFloat(chieuDaiInput.val());
+        var chieuRong = parseFloat(chieuRongInput.val());
 
-    var chieuDai = parseFloat(chieuDaiInput.val());
-    var chieuRong = parseFloat(chieuRongInput.val());
 
+        var chuVi = 2 * (chieuDai + chieuRong);
+        var dienTich = chieuDai * chieuRong;
 
-    var chuVi = 2 * (chieuDai + chieuRong);
-    var dienTich = chieuDai * chieuRong;
+        resultDiv.html("Chu vi: " + chuVi + "<br />Diện tích: " + dienTich);
+    }
 
-    resultDiv.html("Chu vi: " + chuVi + "<br />Diện tích: " + dienTich);
 });

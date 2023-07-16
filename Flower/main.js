@@ -41,7 +41,7 @@ var title = `<thead>
     <th>Hình ảnh</th>
 </tr>
 </thead>`;
-$('tbl').html(title);
+$('#tbl').html(title);
 
 var html = '';
 listNews.map(item => {
@@ -55,4 +55,4 @@ listNews.map(item => {
     `;
 })
 var content = html += ('<tbody>' + html + '</tbody>');
-$('#tbl').html(content)
+$('#tbl').append(content)

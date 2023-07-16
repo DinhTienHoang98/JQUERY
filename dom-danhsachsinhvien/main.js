@@ -1,4 +1,4 @@
-const students = [
+var students = [
     {
         id: '1',
         name: 'Nguyen Van Teo',
@@ -26,7 +26,7 @@ const students = [
     }
 ]
 
-const classList = [
+var classList = [
     {
         id: '1',
         name: "CNTT"
@@ -44,29 +44,26 @@ const classList = [
         name: 'XDDD'
     }
 ]
-// 
+
 function getClassNameById(id) {
     return classList.find(function (el) {
         return el.id === id;
     }).name;
 }
 
-// Tạo danh sách sinh viên
 var listStudents = [];
 students.forEach(function (student) {
     var classInfo = classList.find(function (el) {
         return el.id === student.classId;
-    });
-    var newStudent = {
+    })
+    var newSt = {
         id: student.id,
-        name: student.name,
+        studentName: student.name,
         classId: classInfo.id,
         className: classInfo.name
-    };
-
-    listStudents.push(newStudent);
-});
-console.log(listStudents);
+    }
+    listStudents.push(newSt);
+})
 
 // man hinh hien thi
 function display(array) {
@@ -82,7 +79,6 @@ function display(array) {
     </tr>
 </thead>
 `;
-    tableElement.html(htmlTitle);
     // Noi dung
     var htmlBody = '<body>'
     for (const student of array) {
@@ -90,13 +86,14 @@ function display(array) {
         htmlBody += trElement;
     }
     htmlBody += '</body>'
-    tableElement.html(htmlBody);
+    tableElement.html(htmlTitle + htmlBody);
 }
 display(listStudents);
+
 function displaystudent(student) {
     var htmls = `
     <tr>
-        <td>${student.name}</td>
+        <td>${student.studentName}</td>
         <td>${student.className}</td>
         <td>
             <button onclick = "onUpdate('${student.id}')" > Sua</button>
@@ -108,115 +105,139 @@ function displaystudent(student) {
 };
 
 // Tạo danh sách lớp học
-var classOptions = '<option value="">-- Chọn lớp --</option>';
-classList.forEach(function (classInfo) {
-    classOptions += `<option value="${classInfo.id}">${classInfo.name}</option>`;
-});
-$('#class').html(classOptions);
+var classElement = $('#class');
 
-// ********************
-var tenInput = $('input[name="name"]');
-var lopInput = $('select[name="class"]');
-var createButton = $('#create');
-const updateButton = $('#update');
+var htmlOptions = `<option value=''>-- Chọn lớp --</option>`;
+classList.forEach(function (classInfo) {
+    htmlOptions += `
+            <option value='${classInfo.id}'>${classInfo.name}</option>
+        `;
+})
+
+classElement.html(htmlOptions);
+
+var addBtnElement = $('#create');
+var editBtnElement = $('#update');
+
+var stName = $('input[name="name"]');
+var classInfo = $('select[name="class"]');
+
+// Ham nay de tao ra mot chuoi ngau nhien lam id
+function generateUuid() {
+    return 'xxxx-xxxx-xxx-xxxx'.replace(/[x]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
 function handleBlurInput(input) {
-    var errorElement = input.parentElement.querySelector('.form-message');
-    input.onblur = function () {
-        if (input.value === '') {
-            errorElement.setAttribute('style', 'color: red; font-style: italic')
-            errorElement.innerText = 'Vui long nhap';
+    var errorElement = input.parent().find('.form-message');
+    input.blur(function () {
+        if (input.val() === '') {
+            errorElement.css({ 'display': 'block', 'color': 'red', 'font-style': 'italic' });
+            errorElement.text('Yêu cầu nhập!');
+            input.addClass('invalid')
         } else {
-            errorElement.innerText = ''
+            errorElement.css({ 'display': 'none' });
+            input.removeClass('invalid')
+        }
+    })
+    input.on('input', function () {
+        errorElement.css({ 'display': 'none' });
+        errorElement.text('')
+        input.removeClass('invalid')
+    })
+}
+
+handleBlurInput(stName);
+handleBlurInput(classInfo);
+
+addBtnElement.click(function (e) {
+    e.preventDefault();
+
+    var check = true;
+    if (isRequired(stName)) {
+        check = false;
+    }
+    if (isRequired(classInfo)) {
+        check = false;
+    }
+    if (check) {
+
+        var newSt = {
+            id: generateUuid(),
+            studentName: stName.val(),
+            classId: Number(classInfo.val()),
+            className: getClassNameById(classInfo.val())
+        }
+
+        listStudents.push(newSt);
+        display(listStudents);
+
+        stName.val('');
+        classInfo.val('');
+    }
+
+    function isRequired(input) {
+        var errorElement = input.parent().find('.form-message');
+        if (input.val() === '') {
+            errorElement.css({ 'display': 'block', 'color': 'red', 'font-style': 'italic' });
+            errorElement.text('Yêu cầu nhập!');
+            return true;
+        } else {
+            errorElement.css({ 'display': 'none' });
+            return false;
         }
     }
-    input.oninput = function () {
-        errorElement.setAttribute('style', 'display: none')
-    }
-}
-handleBlurInput(tenInput);
-handleBlurInput(lopInput);
+})
 
-// ham` add student
-function addStudents() {
-    createButton.onclick = function (e) {
-        e.preventDefault();
-        const ten = tenInput.val();
-        const lop = lopInput.val();
-
-        const newStudent = {
-            id: listStudents.length + 1,
-            name: ten,
-            classId: lop,
-            className: getClassNameById(lop)
-        }
-        listStudents.push(newStudent)
-
-        display(listStudents)
-
-        tenInput.val() = '';
-        lopInput.val() = '';
-    }
-}
-// Gắn sự kiện click cho nút Thêm
-createButton.click(addStudents());
-
-// ham` sua sinh vien
 var idEd;
 function onUpdate(id) {
     idEd = id;
-    var editSt = listStudents.find(el => {
-        return el.id == id
+    // Tìm sinh viên muốn sửa
+    var student = listStudents.find(function (st) {
+        return st.id === idEd;
     })
-    tenInput.val() = editSt.name;
-    lopInput.val() = editSt.classId;
 
-    updateButton.style.display = 'block';
-    createButton.style.display = 'none';
+    stName.val(student.studentName);
+    classInfo.val(student.classId);
 
+    addBtnElement.css({ 'display': 'none' });
+    editBtnElement.css({ 'display': 'block' });
 }
-function editStudent() {
-    const name = tenInput.val();
-    const lop = lopInput.val();
 
-    console.log(lop);
-    const student = {
+editBtnElement.click(function (e) {
+    e.preventDefault();
+    var edSt = {
         id: idEd,
-        name: name,
-        classId: Number(lop),
-        className: getClassNameById(lop)
+        studentName: stName.val(),
+        classId: classInfo.val(),
+        className: getClassNameById(classInfo.val())
     }
 
-    var idx = listStudents.findIndex(function (el) {
-        return el.id == idEd;
-    });
-    listStudents.splice(idx, 1, student);
-    // Hiển thị danh sách sinh viên   
-    display(listStudents)
+    var idx = listStudents.findIndex(function (student) {
+        return student.id === idEd;
+    })
+    listStudents.splice(idx, 1, edSt);
+    display(listStudents);
 
-    // xoa noi dung input
-    tenInput.val() = '';
-    lopInput.val() = '';
-    // an nut
-    updateButton.style.display = 'none';
-    createButton.style.display = 'block';
-}
+    addBtnElement.css({ 'display': 'block' });
+    editBtnElement.css({ 'display': 'none' });
 
-// loại bỏ hành vi mặc định của trình duyệt
-updateButton.click(function (e) {
-    e.preventDefault();
+    stName.val('');
+    classInfo.val('');
 })
-// Gắn sự kiện click cho nút Sửa
-updateButton.click(editStudent);
 
 function onDelete(id) {
-    var check = confirm("Bạn có chắc muốn xóa?");
-    if (check) {
-        const idx = listStudents.findIndex(el => {
-            return el.id == id;
-        });
-        listStudents.splice(idx, 1);
-        console.log(listStudents);
-        display(listStudents)
+    if (confirm("Bạn có chắc muốn xóa?")) {
+        var idx = listStudents.findIndex(function (student) {
+            return student.id === id;
+        })
+
+        if (idx !== -1) {
+            listStudents.splice(idx, 1);
+        }
+
+        display(listStudents);
     }
 }

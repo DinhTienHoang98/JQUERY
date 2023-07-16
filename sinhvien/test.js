@@ -16,31 +16,31 @@ const studentList = [
     }
 ];
 
-const nameElement = document.querySelector('input[name="name"]');
-const addressElement = document.querySelector('input[name="address"]');
-const createButton = document.getElementById('create');
-const updateButton = document.getElementById('update');
-const studentInput = document.getElementById('list-students');
+const nameElement = $('input[name="name"]');
+const addressElement = $('input[name="address"]');
+const createButton = $('#create');
+const updateButton = $('#update');
+const studentInput = $('#list-students');
 
 // Hàm kiểm tra input
 function handleBlurInput(input) {
-    const checkElement = input.parentElement.querySelector('.form-message');
+    const checkElement = input.parent().find('.form-message');
 
-    input.onblur = function () {
-        if (input.value.trim() === '') {
-            checkElement.setAttribute('style', 'color: red; font-style: italic');
-            checkElement.innerText = 'Vui lòng nhập';
-            input.classList.add('invalid');
+    input.blur(function () {
+        if (input.val().trim() === '') {
+            checkElement.attr('style', 'color: red; font-style: italic');
+            checkElement.text('Vui lòng nhập');
+            input.addClass('invalid');
         } else {
-            checkElement.innerText = '';
-            input.classList.remove('invalid');
+            checkElement.text('');
+            input.removeClass('invalid');
         }
-    };
+    });
 
-    input.oninput = function () {
-        checkElement.setAttribute('style', 'display: none');
-        input.classList.remove('invalid');
-    };
+    input.on('input', function () {
+        checkElement.attr('style', 'display: none');
+        input.removeClass('invalid');
+    });
 }
 
 handleBlurInput(nameElement);
@@ -48,11 +48,9 @@ handleBlurInput(addressElement);
 
 // Hàm thêm sinh viên mới vào danh sách
 function addStudent() {
-    const name = nameElement.value;
-    const address = addressElement.value;
 
     // Kiểm tra xem tên và địa chỉ có được cung cấp hay không
-    if (name.trim() === '' || address.trim() === '') {
+    if (nameElement.val() === '' || addressElement.val() === '') {
         alert('Vui lòng nhập tên và địa chỉ.');
         return;
     }
@@ -60,8 +58,8 @@ function addStudent() {
     // Tạo đối tượng sinh viên từ thông tin nhập vào
     const student = {
         id: studentList.length + 1,
-        name: name,
-        address: address
+        name: nameElement.val(),
+        address: addressElement.val()
     };
 
     // Thêm sinh viên vào mảng
@@ -71,19 +69,19 @@ function addStudent() {
     displayStudents();
 
     // Xóa nội dung ô input sau khi thêm sinh viên thành công
-    nameElement.value = '';
-    addressElement.value = '';
+    nameElement.val('');
+    addressElement.val('');
 }
 
 // Gắn sự kiện click cho nút Thêm
-createButton.addEventListener('click', addStudent);
+createButton.click(addStudent);
 
 // Hàm hiển thị danh sách sinh viên
 function displayStudents() {
-    let html = '';
+    let htmls = '';
 
     studentList.forEach((student) => {
-        html += `<li class='student-${student.id}'>
+        htmls += `<li class='student-${student.id}'>
             <h2>Tên: ${student.name}</h2>
             <p>Địa chỉ: ${student.address}</p>
             <button onclick="onUpdate(${student.id})">Sửa</button>
@@ -91,7 +89,7 @@ function displayStudents() {
         </li>`;
     });
 
-    studentInput.innerHTML = html;
+    studentInput.html(htmls);
 }
 
 displayStudents();
@@ -103,45 +101,41 @@ function onUpdate(id) {
 
     if (student) {
         // Hiển thị thông tin sinh viên trong ô input
-        nameElement.value = student.name;
-        addressElement.value = student.address;
+        nameElement.val(student.name);
+        addressElement.val(student.address);
 
         // Ẩn nút Thêm và hiển thị nút Sửa
-        createButton.style.display = 'none';
-        updateButton.style.display = 'block';
+        createButton.css({ 'display': 'none' });
+        updateButton.css({ 'display': 'block' });
 
         // Gán sự kiện click cho nút Sửa
-        updateButton.addEventListener('click', function () {
+        updateButton.click(function () {
             // Cập nhật thông tin sinh viên trong danh sách
-            student.name = nameElement.value;
-            student.address = addressElement.value;
+            student.name = nameElement.val();
+            student.address = addressElement.val();
 
             // Hiển thị danh sách sinh viên
             displayStudents();
 
             // Xóa nội dung ô input sau khi sửa sinh viên thành công
-            nameElement.value = '';
-            addressElement.value = '';
+            nameElement.val('');
+            addressElement.val('');
 
             // Hiển thị lại nút Thêm và ẩn nút Sửa
-            createButton.style.display = 'block';
-            updateButton.style.display = 'none';
+            createButton.css({ 'display': 'block' });
+            updateButton.css({ 'display': 'none' });
         });
     }
 }
 
-// Hàm xử lý sự kiện khi nhấn nút Xóa
+// hàm xóa sinh viên
 function onDelete(id) {
-    const confirmed = confirm('Bạn có chắc chắn muốn xóa sinh viên này?');
-    if (confirmed) {
-        // Lọc sinh viên có id khác với id được truyền vào
-        const filteredList = studentList.filter(student => student.id !== id);
-
-        // Cập nhật lại danh sách sinh viên
-        studentList.length = 0;
-        Array.prototype.push.apply(studentList, filteredList);
-
-        // Hiển thị danh sách sinh viên
+    var check = confirm('Bạn có chắc muốn xóa không?');
+    if (check) {
+        var idx = studentList.findIndex(el => {
+            return el.id == id;
+        })
+        studentList.splice(idx, 1)
         displayStudents();
     }
 }

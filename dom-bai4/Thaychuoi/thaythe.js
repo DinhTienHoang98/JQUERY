@@ -15,7 +15,7 @@ $('#form').submit(function (event) {
         errorElement.attr('style', 'color: red; font-style: italic; text-align: center')
         errorElement.text('Vui lòng nhập đầy đủ thông tin!');
     } else {
-        errorElement.html("");
+        errorElement.text('');
         var chuoi = textInput.replace(tugocInput.val(), tuthaytheInput.val())
         output.html(chuoi);
     }

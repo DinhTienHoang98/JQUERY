@@ -24,22 +24,21 @@ const studentInput = $('#list-students');
 
 // Hàm kiểm tra input
 function handleBlurInput(input) {
-    const errorElement = input.parentElement.querySelector('.form-message')
-    console.log(errorElement);
-    input.onblur = function () {
-        if (input.value === '') {
-            errorElement.setAttribute('style', 'color: red;font-style: italic')
-            errorElement.innerText = 'Vui long nhap'
-            input.classList.add('invalid')
+    const errorElement = input.parent().find('.form-message')
+    input.blur(function () {
+        if (input.val() === '') {
+            errorElement.attr('style', 'color: red;font-style: italic')
+            errorElement.text('Vui long nhap')
+            input.addClass('invalid')
         } else {
-            errorElement.innerText = '';
-            input.classList.remove('invalid')
+            errorElement.text('');
+            input.removeClass('invalid')
         }
-    }
-    input.oninput = function () {
-        errorElement.setAttribute('style', 'display: none')
-        input.classList.remove('invalid')
-    }
+    })
+    input.on('input', function () {
+        errorElement.attr('style', 'display: none')
+        input.removeClass('invalid')
+    })
 }
 handleBlurInput(nameElement);
 handleBlurInput(addressElement)
@@ -69,8 +68,8 @@ function addStudent() {
     displayStudents();
 
     // Xóa nội dung ô input sau khi thêm sinh viên thành công
-    nameElement.val() = '';
-    addressElement.val() = '';
+    nameElement.val('');
+    addressElement.val('');
 }
 
 // Hàm sửa sinh viên
@@ -91,11 +90,11 @@ function editStudent() {
     displayStudents();
 
     // Xóa nội dung ô input sau khi thêm sinh viên thành công
-    nameElement.val() = '';
-    addressElement.val() = '';
+    nameElement.val('');
+    addressElement.val('');
     // an nut sua va hien but them
-    updateButton.style.display = 'none';
-    createButton.style.display = 'block';
+    updateButton.css({ 'display': 'none' });
+    createButton.css({ 'display': 'block' });
 
 }
 var idEd;
@@ -105,8 +104,8 @@ function update(id) {
         return el.id == id
     })
     console.log(editSt);
-    nameElement.val() = editSt.name;
-    addressElement.val() = editSt.address;
+    nameElement.val(editSt.name);
+    addressElement.val(editSt.address);
 
     updateButton.style.display = 'block';
     createButton.style.display = 'none';
@@ -138,7 +137,7 @@ function displayStudents() {
         html += `<li class='student-${student.id}'>
             <h2>Tên: ${student.name}</h2>
             <p>Địa chỉ: ${student.address}</p>
-            <button onclick = update(${student.id})>Sửa</button>
+            <button onclick = editStudent(${student.id})>Sửa</button>
             <button onclick = deleteSt(${student.id})>Xóa</button>
         </li>`;
     });

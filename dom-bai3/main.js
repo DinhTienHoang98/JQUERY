@@ -56,5 +56,4 @@ listNews.map(item => {
                 <div class="clr"></div>
             </li>`
 });
-var content = '<ul>' + html + '</ul>';
-$('#list').html(content)
+$('#list').html(html)
